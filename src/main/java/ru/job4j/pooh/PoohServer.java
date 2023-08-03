@@ -27,7 +27,7 @@ public class PoohServer {
     /**
      * ServerSocket server = new ServerSocket(9000) - создаем серверный сокет, который
      * будет прослушивать 9000 порт и ждать запроса от клиентов.
-     * <p>
+     *
      * Для создания сокета в Java необходимо указать IP-адрес и порт сервера, к которому
      * нужно подключиться. После установления соединения можно использовать объекты
      * InputStream и OutputStream для передачи данных между клиентом и сервером.
@@ -43,22 +43,30 @@ public class PoohServer {
                          var input = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
                         while (true) {
                             var details = input.readLine().split(";");
-                            if (details.length != 3) {continue;}
+                            if (details.length != 3) {
+                                continue;
+                            }
                             var action = details[0];
                             var name = details[1];
                             var text = details[2];
                             if (action.equals("intro")) {
                                 if (name.equals("queue")) {
                                     queueSchema.addReceiver(
-                                            new SocketReceiver(text, new PrintWriter(out)));}
+                                            new SocketReceiver(text, new PrintWriter(out))
+                                    );
+                                }
                                 if (name.equals("topic")) {
                                     topicSchema.addReceiver(
-                                            new SocketReceiver(text, new PrintWriter(out)));}
+                                            new SocketReceiver(text, new PrintWriter(out))
+                                    );
+                                }
                             }
                             if (action.equals("queue")) {
-                                queueSchema.publish(new Message(name, text));}
+                                queueSchema.publish(new Message(name, text));
+                            }
                             if (action.equals("topic")) {
-                                topicSchema.publish(new Message(name, text));}
+                                topicSchema.publish(new Message(name, text));
+                            }
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
