@@ -65,7 +65,6 @@ class QueueSchemaTest {
         assertThat(result).contains("18", "20");
     }
 
-
     @Test
     public void whenMultiReceivers() throws InterruptedException {
         var queue = new QueueSchema();

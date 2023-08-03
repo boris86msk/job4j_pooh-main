@@ -17,7 +17,6 @@ public class QueueSchema implements Schema {
     private final ConcurrentHashMap<String, BlockingQueue<String>> data = new ConcurrentHashMap<>();
     private final Condition condition = new Condition();
 
-
     @Override
     public void addReceiver(Receiver receiver) {
         receivers.add(receiver);
