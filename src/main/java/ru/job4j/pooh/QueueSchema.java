@@ -14,11 +14,9 @@ import java.util.concurrent.LinkedBlockingQueue;
  */
 public class QueueSchema implements Schema {
     private final CopyOnWriteArrayList<Receiver> receivers = new CopyOnWriteArrayList<>();
-    //контейнер для регистрации потребителей.
     private final ConcurrentHashMap<String, BlockingQueue<String>> data = new ConcurrentHashMap<>();
-    //используется для аккумуляции сообщений от поставщика.
     private final Condition condition = new Condition();
-    //многопоточный блокирующий флаг. С помощью этого флага мы регулируем работу очередей в контейнере data.
+
 
     @Override
     public void addReceiver(Receiver receiver) {
