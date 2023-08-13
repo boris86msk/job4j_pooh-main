@@ -43,6 +43,7 @@ class QueueSchemaTest {
         assertThat(secondOut.size()).isEqualTo(1);
         assertThat(secondOut.iterator().next()).isIn("23", "20");
     }
+
     @Test
     public void whenSingleReceiver() throws InterruptedException {
         var queue = new QueueSchema();
@@ -136,7 +137,7 @@ class QueueSchemaTest {
         count.await();
         thread.interrupt();
         assertThat(result).containsOnly("20", "22");
-        assertThat(result2).containsOnly("21","23");
+        assertThat(result2).containsOnly("21", "23");
     }
 
 }
