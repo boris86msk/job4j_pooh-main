@@ -13,13 +13,14 @@ import java.util.concurrent.LinkedBlockingQueue;
  * То есть в режиме очередь все сообщения равномерно распределяются между потребителями.
  */
 public class QueueSchema implements Schema {
-    private final CopyOnWriteArrayList<Receiver> receivers = new CopyOnWriteArrayList<>();
+    private final ConcurrentHashMap<String, CopyOnWriteArrayList<Receiver>> receivers = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, BlockingQueue<String>> data = new ConcurrentHashMap<>();
     private final Condition condition = new Condition();
 
     @Override
     public void addReceiver(Receiver receiver) {
-        receivers.add(receiver);
+        receivers.putIfAbsent(receiver.name(), new CopyOnWriteArrayList<>());
+        receivers.get(receiver.name()).add(receiver);
         condition.on();
     }
 
@@ -38,18 +39,23 @@ public class QueueSchema implements Schema {
     public void run() {
         while (!Thread.currentThread().isInterrupted()) {
             do {
-                var mailing = true;
-                while (mailing) {
-                    for (var receiver : receivers) {
-                        var queue = data.get(receiver.name());
-                        var message = queue.poll();
-                        if (message == null) {
-                            mailing = false;
-                            break;
+                    for (var queueKey : receivers.keySet()) {
+                        var queue = data.getOrDefault(queueKey, new LinkedBlockingQueue<>());
+                        var receiversByQueue = receivers.get(queueKey);
+                        var it = receiversByQueue.iterator();
+                        while (it.hasNext()) {
+                            var data = queue.poll();
+                            if (data != null) {
+                                it.next().receive(data);
+                            }
+                            if (data == null) {
+                                break;
+                            }
+                            if (!it.hasNext()) {
+                                it = receiversByQueue.iterator();
+                            }
                         }
-                        receiver.receive(message);
                     }
-                }
                 condition.off();
             } while (condition.check());
             try {

@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
@@ -19,7 +20,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 public class TopicSchema implements Schema {
 
-    private final HashMap<String, ArrayList<Receiver>> receivers = new HashMap<>();
+    private final ConcurrentHashMap<String, CopyOnWriteArrayList<Receiver>> receivers = new ConcurrentHashMap<>();
 
     private final ConcurrentHashMap<String, BlockingQueue<String>> data = new ConcurrentHashMap<>();
 
@@ -27,7 +28,7 @@ public class TopicSchema implements Schema {
 
     @Override
     public void addReceiver(Receiver receiver) {
-        receivers.putIfAbsent(receiver.name(), new ArrayList<>());
+        receivers.putIfAbsent(receiver.name(), new CopyOnWriteArrayList<>());
         receivers.get(receiver.name()).add(receiver);
         condition.on();
     }
@@ -43,8 +44,7 @@ public class TopicSchema implements Schema {
     public void run() {
         while (!Thread.currentThread().isInterrupted()) {
             do {
-                Set<String> topicSet = data.keySet();
-                for (String topic : topicSet) {
+                for (String topic : data.keySet()) {
                     var receiverList = receivers.get(topic);
                     if (receiverList == null) {
                         continue;
